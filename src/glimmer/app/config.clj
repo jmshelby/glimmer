@@ -5,6 +5,9 @@
 
 (def STATE (atom ::empty))
 
+(defn reset! []
+  (clojure.core/reset! STATE ::empty))
+
 (def app
   (memoize #(or (-> (ion/get-app-info) :app-name)
                 (System/getProperty "glimmer.app.ion.app-name"))))
@@ -24,9 +27,7 @@
 
 (defn get
   ([] (when (= ::empty @STATE)
-        (reset! STATE (get-cloud-params)))
+        (clojure.core/reset! STATE (get-cloud-params)))
       @STATE)
   ([key] (clojure.core/get (get) key)))
 
-(defn reset! []
-  (clojure.core/reset! STATE ::empty))
