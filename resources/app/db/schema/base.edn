@@ -4,14 +4,6 @@
   {:entity.date {:created ["Logical timestamp for when date was originally created."
                            :db.type/instant]}}
 
-  ;; Text Indexing Support
-  {:index.text {:slug  ["Text indexing for condensed representation of a string."
-                        :db.type/tuple
-                        {:db/tupleTypes [:db.type/keyword :db.type/string]}]
-                :lower ["Text indexing for case insensitive."
-                        :db.type/tuple
-                        {:db/tupleTypes [:db.type/keyword :db.type/string]}]}}
-
   ;; Ping - anonymous location-based signals
   {:ping {:id      ["Unique identifier for a ping"
                     :db.type/uuid
