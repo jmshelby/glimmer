@@ -1,15 +1,29 @@
 (ns local.sandbox
+  "A place to play around with the code and mess with the database"
   (:require [datomic.client.api :as d]
             [glimmer.app.datomic :as datomic]
             [glimmer.datomic.connect :as dcon]
             [glimmer.core :as core]
-            [glimmer.app.service :as service]))
+            [glimmer.app.service :as service]
+            [glimmer.app.config :as config]
+            [glimmer.datomic.util :as du]
+            [glimmer.app.db.schema :as schema]))
 
 (require '[local.env])
 
+(declare db stats insert retract
+         pull fetch retire-ident
+         attrs switch conn client)
+
 (comment
-  ;; Initialize database and schema
-  (require '[glimmer.app.config :as config])
+
+  (config/get)
+
+  (get-env-info)
+
+  (conn)
+
+
 
   (def cfg (config/get))
 
@@ -25,46 +39,6 @@
 
   ;; Get connection for testing
   (def conn (dcon/get-connection client (:datomic/db-name cfg)))
-
-
-
-  (d/q '[:find ?ident ?type ?cardinality ?doc
-         :where
-         [?e :db/ident ?ident]
-         [?e :db/valueType ?type]
-         [?e :db/cardinality ?cardinality]
-         [(get-else $ ?e :db/doc "") ?doc]]
-       (d/db conn)
-       )
-
-  (d/q '[:find ?ident ?type ?cardinality ?doc
-         :where
-         [?e :db/ident ?ident]
-         [?e :db/valueType ?type]
-         [?e :db/cardinality ?cardinality]
-         [(get-else $ ?e :db/doc "") ?doc]
-         [(namespace ?ident) ?ns]
-         [(not= ?ns "db")]]
-       (d/db conn))
-
-
-  ;; Test ping creation
-  (def ping-result
-    (service/ping-create conn {:coords [40.7128 -74.0060]
-                               :tag "invisible"}))
-
-  ;; Test ping query
-  (def query-result
-    (service/ping-query conn {:tag "invisible" :limit 10}))
-
-  ;; Test pong creation
-  (def pong-result
-    (service/pong-create conn {:pings [(:ping/id (get-in ping-result [:out :ping]))]
-                               :source "test-user"}))
-
-  ;; Test pong query
-  (def pong-query-result
-    (service/ping-pong-query conn {:ping (:ping/id (get-in ping-result [:out :ping]))}))
 
   ;; Query all attributes in the system
   (def all-attributes
@@ -86,7 +60,9 @@
            [(get-else $ ?e :db/doc "") ?doc]
            [(namespace ?ident) ?ns]
            [(not= ?ns "db")]]
-         (d/db conn)))
+         (d/db conn))
+
+    )
 
   ;; Pretty print our custom attributes
   (doseq [[ident type card doc] (sort custom-attributes)]
@@ -138,4 +114,98 @@
 
     )
 
+
+
+  ;; Test ping creation
+  (def ping-result
+    (service/ping-create conn {:coords [40.7128 -74.0060]
+                               :tag    "invisible"}))
+
+  ;; Test ping query
+  (def query-result
+    (service/ping-query conn {:tag "invisible" :limit 10}))
+
+  ;; Test pong creation
+  (def pong-result
+    (service/pong-create conn {:pings  [(:ping/id (get-in ping-result [:out :ping]))]
+                               :source "test-user"}))
+
+  ;; Test pong query
+  (def pong-query-result
+    (service/ping-pong-query conn {:ping (:ping/id (get-in ping-result [:out :ping]))}))
+
   )
+
+;; ===== UTILITY FUNCTIONS =====
+;; These provide convenient REPL functions similar to huckleberry
+;; Usage:
+;;   (switch :local)  ; or (switch :cloud)
+;;   (client)         ; get datomic client
+;;   (conn)           ; get connection
+;;   (db)             ; get database value
+;;   (stats)          ; database statistics
+;;   (attrs)          ; list all schema attributes
+;;   (insert [{:ping/id (random-uuid) ...}])  ; insert data
+;;   (fetch [:ping/tag "invisible"])           ; find by attr/val
+;;   (pull some-entity-id)                     ; pull entity data
+
+(declare get-env-info)
+
+(defn client [] (dcon/get-client (:client (get-env-info))))
+(defn conn [] (dcon/get-connection (client) (:db-name (get-env-info))))
+(defn db [] (d/db (conn)))
+(defn stats [] (d/db-stats (db)))
+(defn insert [recs] (d/transact (conn) {:tx-data recs}))
+(defn retract [ids] (let [pairs (map #(vector :db/retractEntity %) ids)]
+                      (d/transact (conn) {:tx-data pairs})))
+
+;; Useful for needing to redeclare an attribute in a type breaking way
+(defn retire-ident [ident reason]
+  (let [new-ns    (str "deprecated." (namespace ident))
+        new-name  (str (name ident) "_" reason)
+        new-ident (keyword new-ns new-name)]
+    (insert [{:db/id    ident
+              :db/ident new-ident}])))
+
+(defn attrs []
+  ;; Get all schema attributes
+  (->> (d/q '[:find (pull ?e [*])
+              :where [?e :db/ident]
+              [?e :db/valueType]]
+            (db))
+       (map first)
+       (map :db/ident)))
+
+(defn pull
+  ([eid] (pull '[*] eid))
+  ([pattern eid] (d/pull (db) pattern eid)))
+
+(defn fetch
+  ([[attr val]]
+   (fetch [attr val] '[*]))
+  ([[attr val] pexp]
+   (map first
+        (if val
+          (d/q '[:find (pull ?e pexp)
+                 :in $ ?attr ?val pexp
+                 :where [?e ?attr ?val]] (db) attr val pexp)
+          (d/q '[:find (pull ?e pexp)
+                 :in $ ?attr pexp
+                 :where [?e ?attr]] (db) attr pexp)))))
+
+(defonce current-env (atom :local))
+(defn switch [env]
+  (reset! current-env env))
+
+(defn get-env-info []
+  (case @current-env
+    :local {:db-name (config/get :datomic/db-name)
+            :client  {:system      (config/get :datomic/system)
+                      :server-type (config/get :datomic/server-type)
+                      :region      (config/get :aws/region)}}
+    :cloud {:db-name "glimmer.core.prod"
+            :client  {:system      "glimmer-core-prod"
+                      :server-type :ion
+                      :endpoint    "https://your-endpoint.execute-api.region.amazonaws.com"
+                      :region      "us-east-1"}}
+    :else  (throw (Exception. (str "Unknown env name" @current-env)))))
