@@ -3,7 +3,7 @@
 
 ;; Local development configuration
 (when (= :dev (config/env))
-  (reset! config/STATE
+  (clojure.core/reset! config/STATE
     {:datomic/db-name "glimmer"
      :server-type :dev-local
      :system "dev"}))

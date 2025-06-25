@@ -1,6 +1,5 @@
 (ns glimmer.app.api
-  (:require [datomic.client.api :as d]
-            [ring.util.response :as ring]
+  (:require [ring.util.response :as ring]
             [glimmer.app.service :as service]
             [glimmer.datomic.connect.pedestal :as dcon]))
 

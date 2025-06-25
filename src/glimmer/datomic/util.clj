@@ -17,7 +17,7 @@
 
 (defn expand-schema
   "Expand schema definition into Datomic schema attributes"
-  [entity-map add-attrs]
+  [entity-map _add-attrs]
   (for [[entity-name attrs] entity-map
         [attr-name [doc type & opts]] attrs]
     (let [base-attr {:db/ident       (keyword (name entity-name) (name attr-name))
