@@ -11,8 +11,8 @@
   ;; Use our util to get cached client to this system
   (let [opts (merge {:system      system
                      :region      region
-                     ;; Default to :dev-local for development
-                     :server-type (or server-type :dev-local)}
+                     ;; Default to :datomic-local for development
+                     :server-type (or server-type :datomic-local)}
                     (when endpoint
                       {:endpoint endpoint}))]
     (dcon/get-client opts)))
