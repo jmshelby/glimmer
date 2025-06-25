@@ -16,8 +16,8 @@
                  :entity.date/created (java.util.Date.)}
         result  (txact-if ! [entity])]
     {:out {:status :created
-           :ping   (du/pull (:db-after result) 
-                           [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created] 
+           :ping   (du/pull (:db-after result)
+                           [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created]
                            (get (:tempids result) "ping"))}}))
 
 (defn ping-query [! in]

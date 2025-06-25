@@ -10,7 +10,7 @@
                     :db.unique/identity]
           :lat     ["Latitude coordinate"
                     :db.type/double]
-          :lng     ["Longitude coordinate" 
+          :lng     ["Longitude coordinate"
                     :db.type/double]
           :tag     ["Tag/label for the ping purpose"
                     :db.type/string

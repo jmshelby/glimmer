@@ -12,7 +12,7 @@
           ::server/type  :jetty
           ::server/routes app/expand-routes}))
 
-(defn run-dev 
+(defn run-dev
   ([] (run-dev 8080))
   ([port]
    (-> service
@@ -33,6 +33,6 @@
 (comment
   ;; Start development server
   (def dev-server (run-dev 8080))
-  
+
   ;; Stop development server
   (stop-dev dev-server))
