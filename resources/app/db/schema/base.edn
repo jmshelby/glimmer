@@ -1,0 +1,39 @@
+{:schema
+ [
+  ;; General Purpose Entities
+  {:entity.date {:created ["Logical timestamp for when date was originally created."
+                           :db.type/instant]}}
+
+  ;; Text Indexing Support
+  {:index.text {:slug  ["Text indexing for condensed representation of a string."
+                        :db.type/tuple
+                        {:db/tupleTypes [:db.type/keyword :db.type/string]}]
+                :lower ["Text indexing for case insensitive."
+                        :db.type/tuple
+                        {:db/tupleTypes [:db.type/keyword :db.type/string]}]}}
+
+  ;; Ping - anonymous location-based signals
+  {:ping {:id      ["Unique identifier for a ping"
+                    :db.type/uuid
+                    :db.unique/identity]
+          :lat     ["Latitude coordinate"
+                    :db.type/double]
+          :lng     ["Longitude coordinate" 
+                    :db.type/double]
+          :tag     ["Tag/label for the ping purpose"
+                    :db.type/string
+                    :db/index]
+          :coords  ["Latitude/longitude tuple for indexing"
+                    :db.type/tuple
+                    {:db/tupleTypes [:db.type/double :db.type/double]}]}}
+
+  ;; Pong - acknowledgment that someone saw a ping
+  {:pong {:id      ["Unique identifier for a pong"
+                    :db.type/uuid
+                    :db.unique/identity]
+          :ping    ["Reference to the ping being acknowledged"
+                    :db.type/ref
+                    :db/index]
+          :source  ["Optional identifier for who created the pong"
+                    :db.type/string]}}
+ ]}
