@@ -2,7 +2,7 @@
   (:require [datomic.client.api :as d]
             [io.pedestal.interceptor :as interceptor]
             [glimmer.app.config :as config]
-            [glimmer.app.datomic :refer [client]]
+            [glimmer.app.datomic :as datomic]
             [glimmer.datomic.connect :as dcon]))
 
 (def param-get-cept
@@ -18,9 +18,10 @@
   (interceptor/interceptor
     {:name  ::client-cept
      :enter (fn [ctx]
-              (-> ctx
-                  (assoc ::client @client)
-                  (assoc-in [:request ::client] @client)))}))
+              (let [client-instance (datomic/client (::params ctx))]
+                (-> ctx
+                    (assoc ::client client-instance)
+                    (assoc-in [:request ::client] client-instance))))}))
 
 (def conn-cept
   (interceptor/interceptor

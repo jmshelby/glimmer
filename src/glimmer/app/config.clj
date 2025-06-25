@@ -17,7 +17,7 @@
                 (-> (System/getProperty "glimmer.app.ion.env")
                     ensure-keyword))))
 
-(defn get-cloud-params
+(defn- get-cloud-params
   "Get base params from AWS SSM for the current env & app pair."
   ([] (get-cloud-params (env) (app)))
   ([env app]
@@ -30,7 +30,7 @@
         (map #(vector (keyword (first %)) (second %)))
         (into {}))))
 
-(defn get-params
+(defn- get-params
   "Current in-memory environment params, for this app" []
   (when (= ::empty @STATE)
     ;; Lazy load params when state is empty
@@ -43,3 +43,9 @@
   ([] (get-params))
   ([key] (clojure.core/get (get-params) key)))
 
+
+(comment
+
+  (into {} (System/getenv))
+
+  )

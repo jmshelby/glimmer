@@ -1,8 +1,18 @@
 (ns glimmer.app.datomic
-  (:require [glimmer.app.config :as config]
-            [glimmer.datomic.connect :as dcon]))
+  (:require [glimmer.datomic.connect :as dcon]))
 
-(def client
-  (delay
-    (let [cfg (config/get)]
-      (dcon/get-client cfg))))
+(defn client
+  "Best way of acquiring a datomic client based
+  on glimmer app config of current environment."
+  [{:keys [aws/region
+           datomic/system
+           datomic/endpoint
+           datomic/server-type]}]
+  ;; Use our util to get cached client to this system
+  (let [opts (merge {:system      system
+                     :region      region
+                     ;; Default to :dev-local for development
+                     :server-type (or server-type :dev-local)}
+                    (when endpoint
+                      {:endpoint endpoint}))]
+    (dcon/get-client opts)))
