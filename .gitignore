@@ -1,0 +1,84 @@
+# Clojure / Leiningen / deps.edn
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/lib/
+/classes/
+/target/
+/checkouts/
+.lein-deps-sum
+.lein-repl-history
+.lein-plugins/
+.lein-failures
+.nrepl-port
+.cpcache/
+.rebel_readline_history
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.calva/
+.clj-kondo/.cache
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Datomic
+.datomic/
+datomic-transactor.properties
+data/
+log/
+
+# Datomic dev-local
+.datomic-dev-local/
+
+# Environment and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# AWS / Ion deployment
+.aws/
+deploy.zip
+ion-config.edn.bak
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# REPL scratch files
+scratch.clj
+repl-sessions/
+
+# Build artifacts
+out/
+build/
+dist/
+
+# Node modules (if any frontend build tools)
+node_modules/
+
+# Configuration overrides
+config/local.edn
+config/dev.edn
+config/prod.edn
+
+# Clj-kondo cache
+.clj-kondo/.cache
