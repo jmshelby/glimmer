@@ -17,122 +17,41 @@
 
 (comment
 
-  (config/get)
+  (d/list-databases (client) {})
 
-  (get-env-info)
-
-  (conn)
-
-
-
-  (def cfg (config/get))
-
-  (def client (datomic/client cfg))
-
-  cfg
-
-  (d/list-databases client {})
-
-  (d/create-database client {:db-name (:datomic/db-name cfg)})
+  (d/create-database client {:db-name (:datomic/db-name (config/get))})
 
   (core/init-schema!)
 
-  ;; Get connection for testing
-  (def conn (dcon/get-connection client (:datomic/db-name cfg)))
 
-  ;; Query all attributes in the system
-  (def all-attributes
-    (d/q '[:find ?ident ?type ?cardinality ?doc
-           :where
-           [?e :db/ident ?ident]
-           [?e :db/valueType ?type]
-           [?e :db/cardinality ?cardinality]
-           [(get-else $ ?e :db/doc "") ?doc]]
-         (d/db conn)))
+  (attrs)
 
-  ;; Query just our custom attributes (non-db namespace)
-  (def custom-attributes
-    (d/q '[:find ?ident ?type ?cardinality ?doc
-           :where
-           [?e :db/ident ?ident]
-           [?e :db/valueType ?type]
-           [?e :db/cardinality ?cardinality]
-           [(get-else $ ?e :db/doc "") ?doc]
-           [(namespace ?ident) ?ns]
-           [(not= ?ns "db")]]
-         (d/db conn))
-
-    )
-
-  ;; Pretty print our custom attributes
-  (doseq [[ident type card doc] (sort custom-attributes)]
-    (println (format "%-25s %-20s %-15s %s" ident type card doc)))
-
-  ;; === PULL SYNTAX VERSIONS ===
-
-  ;; Query all attributes in the system using pull
-  (def all-attributes-pull
-    (d/q '[:find (pull ?e [:db/ident :db/valueType :db/cardinality :db/doc])
-           :where
-           [?e :db/ident]
-           [?e :db/valueType]]
-         (d/db conn)))
-
-  ;; Query just our custom attributes (non-db namespace) using pull
-  (def custom-attributes-pull
-    (d/q '[:find (pull ?e [:db/ident :db/valueType :db/cardinality :db/doc])
-           :where
-           [?e :db/ident ?ident]
-           [?e :db/valueType]
-           [(namespace ?ident) ?ns]
-           [(not= ?ns "db")]]
-         (d/db conn))
-
-    )
-
-  ;; Pretty print custom attributes from pull results
-  (doseq [attr-map (->> custom-attributes-pull
-                        (map first)
-                        (sort-by :db/ident))]
-    (println (format "%-25s %-20s %-15s %s"
-                     (:db/ident attr-map)
-                     (:db/valueType attr-map)
-                     (:db/cardinality attr-map)
-                     (or (:db/doc attr-map) ""))))
-
-  ;; Alternative: Get all schema attributes as a collection of maps
-  (def schema-attrs
-    (->> (d/q '[:find ?e
-                :where
-                [?e :db/ident ?ident]
-                [?e :db/valueType]
-                [(namespace ?ident) ?ns]
-                [(not= ?ns "db")]]
-              (d/db conn))
-         (map #(d/pull (d/db conn) [:db/ident :db/valueType :db/cardinality :db/doc] (first %)))
-         (sort-by :db/ident))
-
-    )
-
-
+  (fetch [:ping/id])
 
   ;; Test ping creation
-  (def ping-result
-    (service/ping-create conn {:coords [40.7128 -74.0060]
-                               :tag    "invisible"}))
+  (service/ping-create (conn) {:coords [39.7518, -105.0178]
+                               :tag    "jake"})
 
   ;; Test ping query
-  (def query-result
-    (service/ping-query conn {:tag "invisible" :limit 10}))
+  (service/ping-query (conn) {:tag "jake" :limit 10})
+  (->>
+    (service/ping-query (conn) {:tag "jake" :limit 10})
+    :out
+    :pings
+    (map :ping/id)
+    )
 
   ;; Test pong creation
-  (def pong-result
-    (service/pong-create conn {:pings  [(:ping/id (get-in ping-result [:out :ping]))]
-                               :source "test-user"}))
+  ;; Then create pong referencing that ping
+  (service/pong-create (conn) {:pings  ["a403b414-5874-491e-8de6-6544bb50154d"
+                                        "27392da9-dfbc-4ad3-9782-b9a4bbda1a0e"
+                                        "eca59a91-2b3e-46f8-a2d3-60fcb9a30960"]
+                               :source "test-user"})
+
+  (fetch [:pong/id])
 
   ;; Test pong query
-  (def pong-query-result
-    (service/ping-pong-query conn {:ping (:ping/id (get-in ping-result [:out :ping]))}))
+  ;; (service/ping-pong-query conn {:ping (:ping/id (get-in ping-result [:out :ping]))})
 
   )
 
