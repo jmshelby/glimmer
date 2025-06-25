@@ -1,12 +1,11 @@
 (ns glimmer.app.service
   (:require [datomic.client.api :as d]
             [glimmer.util :refer [uuid]]
-            [glimmer.datomic.api :refer [txact-if db]]
+            [glimmer.datomic.api :refer [txact-if]]
             [glimmer.datomic.util :as du]))
 
 (defn ping-create [! in]
-  (let [$      (d/db !)
-        [lat lng] (:coords in)
+  (let [[lat lng] (:coords in)
         tag     (:tag in)
         ping-id (uuid)
         entity  {:db/id              "ping"
@@ -25,21 +24,14 @@
   (let [$      (d/db !)
         tag    (:tag in)
         limit  (or (:limit in) 1000)
-        query  (if tag
-                 '{:query {:find [(pull ?e [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created])]
-                           :in [$ ?tag]
-                           :where [[?e :ping/tag ?tag]]}
-                   :args [$ ?tag]
-                   :limit ?limit}
-                 '{:query {:find [(pull ?e [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created])]
-                           :where [[?e :ping/id]]}
-                   :args [$]
-                   :limit ?limit})
         results (if tag
-                  (d/q {:query (:query query)
+                  (d/q {:query '[:find (pull ?e [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created])
+                                 :in $ ?tag
+                                 :where [?e :ping/tag ?tag]]
                         :args [$ tag]
                         :limit limit})
-                  (d/q {:query (:query query)
+                  (d/q {:query '[:find (pull ?e [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created])
+                                 :where [?e :ping/id]]
                         :args [$]
                         :limit limit}))]
     {:out {:pings (map first results)}}))
@@ -49,10 +41,10 @@
         ping-ids (:pings in)
         source   (:source in)
         pongs    (for [ping-id ping-ids]
-                   (let [ping-entity (d/q '{:query {:find [?e]
-                                                    :in [$ ?ping-id]
-                                                    :where [[?e :ping/id ?ping-id]]}
-                                            :args [$ ?ping-id]})]
+                   (let [ping-entity (d/q {:query '[:find ?e
+                                                     :in $ ?ping-id
+                                                     :where [?e :ping/id ?ping-id]]
+                                            :args [$ ping-id]})]
                      (when (seq ping-entity)
                        (cond-> {:db/id              "pong"
                                 :pong/id            (uuid)
@@ -60,20 +52,20 @@
                                 :entity.date/created (java.util.Date.)}
                                source (assoc :pong/source source)))))
         valid-pongs (filter some? pongs)
-        result      (txact-if ! valid-pongs)]
+        _result     (txact-if ! valid-pongs)]
     {:out {:status :created
            :count  (count valid-pongs)}}))
 
 (defn ping-pong-query [! in]
-  (let [$       (d/db !)
-        ping-id (:ping in)
-        ping-entity (d/q '{:query {:find [?e]
-                                   :in [$ ?ping-id]
-                                   :where [[?e :ping/id ?ping-id]]}
-                           :args [$ ?ping-id]})
+  (let [$         (d/db !)
+        ping-id   (:ping in)
+        ping-entity (d/q {:query '[:find ?e
+                                   :in $ ?ping-id
+                                   :where [?e :ping/id ?ping-id]]
+                          :args [$ ping-id]})
         results (when (seq ping-entity)
-                  (d/q '{:query {:find [(pull ?pong [:pong/id :pong/source :entity.date/created])]
-                                 :in [$ ?ping-ref]
-                                 :where [[?pong :pong/ping ?ping-ref]]}
-                         :args [$ (ffirst ping-entity)]}))]
+                  (d/q {:query '[:find (pull ?pong [:pong/id :pong/source :entity.date/created])
+                                 :in $ ?ping-ref
+                                 :where [?pong :pong/ping ?ping-ref]]
+                        :args [$ (ffirst ping-entity)]}))]
     {:out {:pongs (map first (or results []))}}))
