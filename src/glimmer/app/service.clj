@@ -6,21 +6,22 @@
 
 (defn ping-create [! in]
   (let [[lat lng] (:coords in)
-        tag     (:tag in)
-        ping-id (uuid)
-        entity  {:db/id              "ping"
-                 :ping/id            ping-id
-                 :ping/lat           lat
-                 :ping/lng           lng
-                 :ping/tag           tag
-                 :entity.date/created (java.util.Date.)}
-        result  (txact-if ! [entity])]
+        tag       (:tag in)
+        ping-id   (uuid)
+        entity    {:db/id               "ping"
+                   :ping/id             ping-id
+                   :ping/lat            lat
+                   :ping/lng            lng
+                   :ping/tag            tag
+                   :entity.date/created (java.util.Date.)}
+        result    (txact-if ! [entity])]
     {:out {:status :created
            :ping   (du/pull (:db-after result)
-                           [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created]
-                           (get (:tempids result) "ping"))}}))
+                            [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created]
+                            (get (:tempids result) "ping"))}}))
 
 (defn ping-query [! in]
+  ;; TODO - add sorting
   (let [$       (d/db !)
         tag     (:tag in)
         limit   (or (:limit in) 100)
@@ -46,8 +47,7 @@
                                                      :where [?e :ping/id ?ping-id]]
                                             :args [$ ping-id]})]
                      (when (seq ping-entity)
-                       (cond-> {:db/id              "pong"
-                                :pong/id            (uuid)
+                       (cond-> {:pong/id            (uuid)
                                 :pong/ping          (ffirst ping-entity)
                                 :entity.date/created (java.util.Date.)}
                                source (assoc :pong/source source)))))
