@@ -21,18 +21,18 @@
                            (get (:tempids result) "ping"))}}))
 
 (defn ping-query [! in]
-  (let [$      (d/db !)
-        tag    (:tag in)
-        limit  (or (:limit in) 1000)
+  (let [$       (d/db !)
+        tag     (:tag in)
+        limit   (or (:limit in) 100)
         results (if tag
                   (d/q {:query '[:find (pull ?e [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created])
                                  :in $ ?tag
                                  :where [?e :ping/tag ?tag]]
-                        :args [$ tag]
+                        :args  [$ tag]
                         :limit limit})
                   (d/q {:query '[:find (pull ?e [:ping/id :ping/lat :ping/lng :ping/tag :entity.date/created])
                                  :where [?e :ping/id]]
-                        :args [$]
+                        :args  [$]
                         :limit limit}))]
     {:out {:pings (map first results)}}))
 
