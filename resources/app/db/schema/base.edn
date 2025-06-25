@@ -14,10 +14,7 @@
                     :db.type/double]
           :tag     ["Tag/label for the ping purpose"
                     :db.type/string
-                    :db/index]
-          :coords  ["Latitude/longitude tuple for indexing"
-                    :db.type/tuple
-                    {:db/tupleTypes [:db.type/double :db.type/double]}]}}
+                    :db/index]}}
 
   ;; Pong - acknowledgment that someone saw a ping
   {:pong {:id      ["Unique identifier for a pong"

@@ -14,7 +14,6 @@
                  :ping/lat           lat
                  :ping/lng           lng
                  :ping/tag           tag
-                 :ping/coords        [lat lng]
                  :entity.date/created (java.util.Date.)}
         result  (txact-if ! [entity])]
     {:out {:status :created
