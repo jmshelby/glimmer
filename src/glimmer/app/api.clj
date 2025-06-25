@@ -13,7 +13,8 @@
             "ping/query"      (service/ping-query ! in)
             "pong"            (service/pong-create ! in)
             "ping.pong/query" (service/ping-pong-query ! in)
-            {:anomaly :unknown-operation :op op})
+            {:op      op
+             :anomaly :unknown-operation})
           (catch Exception e
             {:anomaly (.getMessage e)}))]
     (ring/response out)))
