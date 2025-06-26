@@ -10,4 +10,25 @@ echo "📍 Health check: http://localhost:$PORT/health"
 echo "🔗 API endpoint: http://localhost:$PORT/glimmer/op"
 echo ""
 
-clj -M:dev -e "(require 'local.server) (println \"Server starting...\") (local.server/run-dev $PORT) (println \"✅ Server running on port $PORT\") @(promise)"
+clj -M:dev -e "
+(require '[local.server :as server]
+         '[glimmer.app.config :as config]
+         '[glimmer.app.datomic :as db]
+         '[glimmer.app.db.schema :as schema])
+
+(println \"📋 App Configuration:\")
+(println \"   App Name:\" (config/app))
+(println \"   Environment:\" (config/env))
+(println \"   Config:\" (config/get))
+(println \"\")
+
+(println \"🗄️  Ensuring database schema...\")
+(let [! (db/client)]
+  (schema/ensure-schema! !)
+  (println \"✅ Schema ready\"))
+(println \"\")
+
+(println \"🌐 Starting server...\")
+(server/run-dev $PORT)
+(println \"✅ Server running on port $PORT\")
+@(promise)"
