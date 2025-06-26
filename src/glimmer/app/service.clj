@@ -1,6 +1,6 @@
 (ns glimmer.app.service
   (:require [datomic.client.api :as d]
-            [glimmer.util :refer [uuid]]
+            [glimmer.util :refer [uuid ensure-uuid]]
             [glimmer.datomic.api :refer [txact-if]]
             [glimmer.datomic.util :as du]))
 
@@ -39,7 +39,7 @@
 
 (defn pong-create [! in]
   (let [$        (d/db !)
-        ping-ids (:pings in)
+        ping-ids (map ensure-uuid (:pings in))
         source   (:source in)
         pongs    (for [ping-id ping-ids]
                    (let [ping-entity (d/q {:query '[:find ?e
@@ -58,7 +58,7 @@
 
 (defn ping-pong-query [! in]
   (let [$         (d/db !)
-        ping-id   (:ping in)
+        ping-id   (ensure-uuid (:ping in))
         ping-entity (d/q {:query '[:find ?e
                                    :in $ ?ping-id
                                    :where [?e :ping/id ?ping-id]]
