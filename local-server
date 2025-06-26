@@ -14,16 +14,22 @@ clj -M:dev -e "
 (require '[local.server :as server]
          '[glimmer.app.config :as config]
          '[glimmer.app.datomic :as db]
-         '[glimmer.app.db.schema :as schema])
+         '[glimmer.app.db.schema :as schema]
+         '[glimmer.datomic.connect :as dcon]
+         '[clojure.pprint :as pprint])
 
 (println \"📋 App Configuration:\")
 (println \"   App Name:\" (config/app))
 (println \"   Environment:\" (config/env))
-(println \"   Config:\" (config/get))
+(println \"   Config:\")
+(pprint/pprint (config/get))
 (println \"\")
 
 (println \"🗄️  Ensuring database schema...\")
-(let [! (db/client)]
+(let [cfg (config/get)
+      client (db/client cfg)
+      db-name (:datomic/db-name cfg)
+      ! (dcon/get-connection client db-name)]
   (schema/ensure-schema! !)
   (println \"✅ Schema ready\"))
 (println \"\")
