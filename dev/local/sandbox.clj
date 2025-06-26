@@ -29,29 +29,39 @@
   (fetch [:ping/id])
 
   ;; Test ping creation
-  (service/ping-create (conn) {:coords [39.7518, -105.0178]
+  (service/ping-create (conn) {:coords [39.6403, -104.8608]
                                :tag    "jake"})
 
   ;; Test ping query
   (service/ping-query (conn) {:tag "jake" :limit 10})
+
   (->>
     (service/ping-query (conn) {:tag "jake" :limit 10})
     :out
     :pings
     (map :ping/id)
+    (map str)
     )
 
   ;; Test pong creation
   ;; Then create pong referencing that ping
   (service/pong-create (conn) {:pings  ["a403b414-5874-491e-8de6-6544bb50154d"
-                                        "27392da9-dfbc-4ad3-9782-b9a4bbda1a0e"
-                                        "eca59a91-2b3e-46f8-a2d3-60fcb9a30960"]
-                               :source "test-user"})
+                                        "62b13103-41d5-4ead-a12f-c266421c7f7f"]
+                               :source "other-user-4"})
 
-  (fetch [:pong/id])
+  (->>
+    (fetch [:pong/id])
+    (sort-by :entity.date/created)
+    )
 
   ;; Test pong query
-  ;; (service/ping-pong-query conn {:ping (:ping/id (get-in ping-result [:out :ping]))})
+  (service/ping-pong-query (conn) {:ping
+                                   "a403b414-5874-491e-8de6-6544bb50154d"
+                                   ;; "27392da9-dfbc-4ad3-9782-b9a4bbda1a0e"
+                                   ;; "eca59a91-2b3e-46f8-a2d3-60fcb9a30960"
+                                   ;; "62b13103-41d5-4ead-a12f-c266421c7f7f"
+                                   })
+
 
   )
 

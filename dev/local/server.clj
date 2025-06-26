@@ -32,7 +32,9 @@
 
 (comment
   ;; Start development server
-  (def dev-server (run-dev 8080))
+  (def dev-server (run-dev 4000))
 
   ;; Stop development server
-  (stop-dev dev-server))
+  (stop-dev dev-server)
+
+  )
