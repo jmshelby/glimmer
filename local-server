@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Glimmer Local Development Server
+# Starts server on port 4000 by default
+
+PORT=${1:-4000}
+
+echo "🚀 Starting Glimmer local server on port $PORT..."
+echo "📍 Health check: http://localhost:$PORT/health"
+echo "🔗 API endpoint: http://localhost:$PORT/glimmer/op"
+echo ""
+
+clj -M:dev -e "(require 'local.server) (println \"Server starting...\") (local.server/run-dev $PORT) (println \"✅ Server running on port $PORT\") @(promise)"
