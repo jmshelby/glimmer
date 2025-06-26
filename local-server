@@ -16,6 +16,7 @@ clj -M:dev -e "
          '[glimmer.app.datomic :as db]
          '[glimmer.app.db.schema :as schema]
          '[glimmer.datomic.connect :as dcon]
+         '[datomic.client.api :as d]
          '[clojure.pprint :as pprint])
 
 (println \"📋 App Configuration:\")
@@ -25,13 +26,17 @@ clj -M:dev -e "
 (pprint/pprint (config/get))
 (println \"\")
 
-(println \"🗄️  Ensuring database schema...\")
+(println \"🗄️  Ensuring database exists...\")
 (let [cfg (config/get)
       client (db/client cfg)
-      db-name (:datomic/db-name cfg)
-      ! (dcon/get-connection client db-name)]
-  (schema/ensure-schema! !)
-  (println \"✅ Schema ready\"))
+      db-name (:datomic/db-name cfg)]
+  (println \"   Creating database:\" db-name)
+  (d/create-database client {:db-name db-name})
+  (println \"✅ Database ready\")
+  (println \"   Ensuring schema...\")
+  (let [! (dcon/get-connection client db-name)]
+    (schema/ensure-schema! !)
+    (println \"✅ Schema ready\")))
 (println \"\")
 
 (println \"🌐 Starting server...\")
