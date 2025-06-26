@@ -10,12 +10,10 @@
                  :jvm-opts ["-Dglimmer.app.ion.env=dev"
                             "-Dglimmer.app.ion.app-name=glimmer-core"]
                  :extra-deps {com.datomic/local {:mvn/version "1.0.276"}
-                              io.pedestal/pedestal.jetty {:mvn/version "0.7.0"}
-                              com.datomic/ion-dev {:mvn/version "0.9.276"}}}
+                              io.pedestal/pedestal.jetty {:mvn/version "0.7.0"}}}
            :test {:main-opts ["-m" "kaocha.runner"]
                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
            :deploy {:extra-paths ["dev"]
                     :main-opts ["-m" "local.deploy"]
-                    :jvm-opts ["--add-opens=java.base/java.lang=ALL-UNNAMED"]
-                    :extra-deps {com.datomic/ion-dev {:mvn/version "0.9.276"}}}}
+                    :jvm-opts ["--add-opens=java.base/java.lang=ALL-UNNAMED"]}}
  :mvn/repos {"datomic-cloud" {:url "s3://datomic-releases-1fc2183a/maven/releases"}}}
