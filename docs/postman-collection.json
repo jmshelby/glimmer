@@ -1,0 +1,205 @@
+{
+  "info": {
+    "name": "Glimmer API",
+    "description": "Anonymous location-based ping/pong API for sharing presence and acknowledgments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://glimmer.dev.auticmatic.com:4000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Ping - Downtown Denver",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"ping\",\n  \"in\": {\n    \"coords\": [39.7392, -104.9903],\n    \"tag\": \"invisible\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Ping - Capitol Hill",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"ping\",\n  \"in\": {\n    \"coords\": [39.7518, -105.0178],\n    \"tag\": \"lonely\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Ping - Cherry Creek",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"ping\",\n  \"in\": {\n    \"coords\": [39.7047, -104.9598],\n    \"tag\": \"help\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Query All Pings",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"ping/query\",\n  \"in\": {\n    \"limit\": 50\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Query Pings by Tag - invisible",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"ping/query\",\n  \"in\": {\n    \"tag\": \"invisible\",\n    \"limit\": 10\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Pongs (Bulk Acknowledge)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"pong\",\n  \"in\": {\n    \"pings\": [\n      \"REPLACE-WITH-ACTUAL-PING-ID-1\",\n      \"REPLACE-WITH-ACTUAL-PING-ID-2\"\n    ],\n    \"source\": \"pete-test-user\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Query Pongs for Ping",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"ping.pong/query\",\n  \"in\": {\n    \"ping\": \"REPLACE-WITH-ACTUAL-PING-ID\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Unknown Operation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"op\": \"invalid-operation\",\n  \"in\": {}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/glimmer/op",
+          "host": ["{{baseUrl}}"],
+          "path": ["glimmer", "op"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
