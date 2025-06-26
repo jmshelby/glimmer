@@ -1,8 +1,8 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.10.1"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         com.datomic/ion {:mvn/version "1.0.68"}
         com.datomic/client-cloud {:mvn/version "0.8.102"}
-        io.pedestal/pedestal.service {:mvn/version "0.6.3"}
+        io.pedestal/pedestal.service {:mvn/version "0.7.0"}
         io.pedestal/pedestal.ions {:git/url "https://github.com/pedestal/pedestal.ions.git"
                                    :sha "56070e360295f3359a6300a2d27858e0a125188b"
                                    :tag "0.1.3"}}
@@ -10,10 +10,10 @@
                  :jvm-opts ["-Dglimmer.app.ion.env=dev"
                             "-Dglimmer.app.ion.app-name=glimmer-core"]
                  :extra-deps {com.datomic/local {:mvn/version "1.0.276"}
-                              io.pedestal/pedestal.jetty {:mvn/version "0.6.3"}
+                              io.pedestal/pedestal.jetty {:mvn/version "0.7.0"}
                               com.datomic/ion-dev {:mvn/version "0.9.276"}}}
            :test {:main-opts ["-m" "kaocha.runner"]
-                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
+                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
            :deploy {:extra-paths ["dev"]
                     :main-opts ["-m" "local.deploy"]
                     :jvm-opts ["--add-opens=java.base/java.lang=ALL-UNNAMED"]
