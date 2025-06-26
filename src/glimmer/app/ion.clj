@@ -5,11 +5,15 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.http.body-params :as body-params]
             [glimmer.app.api :as app-api]
-            [glimmer.app.health.api :as health-api]))
+            [glimmer.app.health.api :as health-api]
+            [glimmer.app.rest :as rest-api]
+            [glimmer.app.docs :as docs-api]))
 
 (defn expand-routes []
   (route/expand-routes (union (deref #'app-api/routes)
-                              (deref #'health-api/routes))))
+                              (deref #'health-api/routes)
+                              (deref #'rest-api/routes)
+                              (deref #'docs-api/routes))))
 
 (def service {::http/routes (expand-routes)})
 
